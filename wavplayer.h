@@ -5,42 +5,54 @@
 #include <QAudioOutput>
 #include <QAudioFormat>
 
-QT_FORWARD_DECLARE_CLASS(QAbstractButton)
-QT_FORWARD_DECLARE_CLASS(QLabel)
-QT_FORWARD_DECLARE_CLASS(QSlider)
-QT_FORWARD_DECLARE_CLASS(QFile)
-QT_FORWARD_DECLARE_CLASS(QUrl)
+class QAbstractButton;
+class QLabel;
+class QSlider;
+class QFile;
+class QUrl;
 
 class WavPlayer : public QWidget
 {
     Q_OBJECT
-
 public:
-    WavPlayer(QWidget *parent = nullptr);
-    static QStringList supportedAudioTypes();
+    enum PlayState{
+        StoppedState,
+        PlayingState,
+        PausedState
+    };
 
+    WavPlayer(QWidget *parent = nullptr);
+    static QStringList supportedAudioTypes(); //支持音频类型
     ~WavPlayer();
+
+    PlayState State() const;
 private:
     void createWidgets();
     void createShortcut();
 
-    QAbstractButton *openButton = nullptr;
-    QAbstractButton *playButton = nullptr;
-    QSlider *positionSlider = nullptr;
-    QLabel *infoLabel = nullptr;
-    QLabel *positionLabel = nullptr;
+    QAbstractButton* openButton = nullptr;
+    QAbstractButton* playButton = nullptr;
+    QSlider* positionSlider = nullptr;
+    QLabel* infoLabel = nullptr;
+    QLabel* positionLabel = nullptr;
     QString fileName;
-    QFile *sourceFile = nullptr;
-    QAudioOutput *audio = nullptr;
-    QUrl *fileUrl = nullptr;
+    QFile* sourceFile = nullptr;
+    QAudioOutput* audio = nullptr;
+    QUrl* fileUrl = nullptr;
+    PlayState state; //播放状态
+
+signals:
+    void stateChange(WavPlayer::PlayState newState);
+
 private:
     void openFile();
     void playUrl(const QUrl& url);
     void togglePlayback();
-    void seekForward();
-    void seekBackward();
+    void setPlayState(WavPlayer::PlayState newState);
+    void setAudioUrl(const QUrl &url);
+
 private slots:
-    void handleStateChanged(QAudio::State newState);
+    void upadateState(QAudio::State newState);
     void play();
     void pause();
 };
